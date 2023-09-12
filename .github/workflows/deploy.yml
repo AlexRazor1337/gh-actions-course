@@ -16,6 +16,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Install deps
         run: npm ci
       - name: Lint code
@@ -25,7 +30,7 @@ jobs:
   build:
     needs: test
     outputs:
-      script-file: ${{ steps.publish.outputs.script-file }}
+      script_file: ${{ steps.publish.outputs.script_file }}
     runs-on: ubuntu-latest
     steps:
       - name: Get code
@@ -34,12 +39,17 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Install deps
         run: npm ci
       - name: Build project
         run: npm run build
       - name: Publish filename
-        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
+        run: find dist/assets/*.js -type f -execdir echo 'script_file={}' >> $GITHUB_OUTPUT ';'
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
@@ -53,7 +63,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build
-      - name: Get script-file
-        run: echo ${{ needs.build.outputs.script-file }}
+      - name: Get script file
+        run: echo ${{ needs.build.outputs.script_file }}
       - name: Deploy
         run: ls && echo "Deploy mock"
